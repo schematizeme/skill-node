@@ -1,0 +1,11 @@
+slug = "node"
+name = "schematize-node"
+tag = "Backend legado · Node/TS"
+status = "beta"
+order = 4
+current_version = "0.2.0"
+
+[descriptions]
+pt = "Manutenção de legado Node.js/TypeScript e saída gradual para Go/Rust — sem reescrever o que funciona."
+en = "Node.js/TypeScript legacy maintenance and gradual exit to Go/Rust — without rewriting what works."
+es = "Mantenimiento de legado Node.js/TypeScript y salida gradual a Go/Rust — sin reescribir lo que funciona."
