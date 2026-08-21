@@ -9,7 +9,7 @@ No ângulo do node quase nunca é "scaffold do zero": o projeto **já tem** um a
 Node/TS (Passport/express-session/JWT-no-`localStorage`/bcrypt/email-como-ID/1 fator/authz
 por coluna/monolith) e **portá-lo pro IAM da casa é PRIORIDADE 0** — acima do gatilho normal
 de saída do Node (30/50, §3.1). Não se escreve auth Node novo: o auth-alvo nasce **app
-separada** em Go/Rust (`schematize-go`/`rust`).
+separada** numa linguagem do rol sancionado, por fit + ADR (`schematize-engineering` → `references/linguagens.md`).
 
 ## 0. Modo
 - `audit` — varre o legado e reporta o gap contra o piso IAM (checklist §iam) + o inventário
@@ -31,7 +31,7 @@ Varra e reporte, arquivo:linha, o perfil do legado (`references/iam.md` §0):
 ## 2. Alvo (inegociável) — o IAM que a migração alcança
 Confirme/scaffolde o auth-alvo como **aplicação SEPARADA** (`references/iam.md` §1):
 - Serviço próprio `<projeto>_auth_<lang>` (**Go/Rust, nunca Node novo**) + front `<projeto>_authfront`,
-  em **`auth.<domain>`** — user Linux + systemd isolados (casa com `ops.md` §3). Monolith apensado = VETADO.
+  em **`auth.<domain>`** — user Linux + systemd isolados (casa com `schematize-engineering` -> `ops.md` §3). Monolith apensado = VETADO.
 - App principal (o monolith Node) e clientes **delegam por OIDC/OAuth2.1 + PKCE**; a chave de
   assinatura só no auth, o Node passa a **validar por JWKS público** (fim do HS256 no `.env`).
 - **ID interno imutável** (ULID/UUIDv7); **email/telefone nunca são ID**; N emails por usuário.

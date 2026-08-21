@@ -4,6 +4,8 @@ tag = "Backend legado · Node/TS"
 status = "beta"
 order = 4
 current_version = "0.11.0"
+requires = ["engineering"]   # o piso vem da base; esta skill so especializa (SKILL.md, "Precedencia e heranca")
+href = "/node"
 
 [descriptions]
 pt = "Manutenção de legado Node.js/TypeScript e saída gradual para Go/Rust — sem reescrever o que funciona."

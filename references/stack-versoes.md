@@ -1,12 +1,13 @@
 # Anexo A — números voláteis (limiares e versões)
 
-> Parte da skill **schematize-node**. **Fonte volátil** — versões e limiares mudam. Atualize aqui (revisão trimestral) sem mexer no corpo normativo. Última verificação: **junho/2026**. Sempre confirme o número atual antes de aplicar como gate.
+> Parte da skill **schematize-node**. **Fonte volátil** — versões e limiares mudam. Atualize aqui (revisão trimestral) sem mexer no corpo normativo. **Verificado em: 2026-08-21**. Sempre confirme o número atual antes de aplicar como gate.
+> Conferido no `nodejs.org/dist/index.json` nesta data: **LTS Active = 24.19.0 (Krypton)**; 22.23.2 (Jod) em manutenção; **26.7.0 é *Current*, NÃO-LTS** (vira LTS em out/2026); 20 (Iron) e 18 (Hydrogen) fora da janela recomendada.
 
 ## Node runtime
 
 - **LTS suportada alvo:** a LTS "Active"/"Maintenance" corrente do Node (ver <https://nodejs.org/en/about/previous-releases>). Rodar em versão **fora de suporte** = piso de segurança violado (CVE sem patch).
 - `engines.node` pinado; imagem base por digest.
-- Recursos que exigem versão mínima (piso antes de usar): `fetch` global e `node:test` (Node ≥18), `--experimental-strip-types`/type-stripping (Node ≥22), `structuredClone` (≥17).
+- Recursos que exigem versão mínima (piso antes de usar): `fetch` global e `node:test` (Node ≥18), `--experimental-strip-types`/type-stripping (Node ≥22; ligado por padrão a partir do 23) — e **atenção**: type stripping só apaga sintaxe **apagável**, então `enum`, `namespace` e **parameter properties** (`constructor(private x: T)`) NÃO rodam; use `erasableSyntaxOnly` (TS ≥5.8) para o compilador cobrar isso, `structuredClone` (≥17).
 
 ## Limiares de dependências (sinal de saúde, não veredito cego)
 

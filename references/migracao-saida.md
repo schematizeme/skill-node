@@ -31,7 +31,7 @@ Node backend está em saída, mas **sem prazo forçado**: migra-se **oportunisti
 
 ## Go ou Rust no ponto de extração
 
-- **Default: Go** (padrão de backend da casa — `schematize-go`). **Rust** quando o pedaço extraído é **performance-crítico ou exige segurança de memória** (`schematize-rust`). Decisão registrada no ADR de extração.
+- **Sem default: a linguagem sai de fit + ADR** (`schematize-engineering` → `references/linguagens.md`), como qualquer serviço novo da casa. Guia rápido para o pedaço extraído: **Go** para serviço de rede/API concorrente e tooling; **Rust** quando é **performance-crítico ou exige segurança de memória** (`schematize-rust`). Decisão registrada no ADR de extração.
 
 ## Independência durante a coexistência
 

@@ -12,7 +12,7 @@ Carregue **à força** e passe a aplicar os Padrões de Manutenção de Legado N
    - `riscos-node.md` — EOL/versão-piso, ESM/CJS, memória/event-loop, workers/streams, graceful shutdown, prototype pollution/ReDoS.
    - `ops.md` — **control plane `<projeto>_ops`**: fluxo dev→local→github→hml→prd (nada direto no servidor), ops como interface única (100%, autônomo), instalação paralela=`nproc`, independência=invariante (prioridade máxima).
    - `iam.md` — **migrar o auth legado Node/TS pro IAM da casa é PRIORIDADE 0** (acima do gatilho 30/50): legado típico (JWT-no-`localStorage`/bcrypt/email-como-ID/1 fator/monolith) → **app separada** (Go/Rust, `auth.<domain>`) por **strangler-fig** — mapeia `users`→ID interno, re-hash preguiçoso (bcrypt→argon2id), força 2º fator, revoga sessões legadas, re-deriva authz no ReBAC (nunca confia na coluna), logout irreversível; concluído = auth legado deletado. `/node-iam`.
-   - `arquitetura.md`, `seguranca.md`, `dados-eventos.md`, `cadeia-suprimentos.md`, `testes.md` + `testes-execucao.md`, `observabilidade.md`, `operacao.md` + `entrega.md`, `anti-padroes.md`, `contexto-claude-code.md`.
+   - `arquitetura.md`, `seguranca.md`, `dados-eventos.md`, `cadeia-suprimentos.md`, `testes.md`, `observabilidade.md`, `operacao.md` + `entrega.md`, `anti-padroes.md`, `contexto-claude-code.md`.
    - `stack-versoes.md` — números voláteis (limiares de deps, Node LTS).
 
 2. **Confirme ao usuário** que leu, com **1 linha por arquivo** resumindo o piso central de cada um.

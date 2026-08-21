@@ -2,7 +2,7 @@
 name: schematize-node
 metadata:
   version: 0.11.0
-description: Padrões da casa para MANUTENÇÃO de código legado em Node.js/TypeScript — não para criar serviço backend novo (isso é Go/Rust; ver schematize-go/rust). Use ao revisar, corrigir, otimizar (só perf exigida), tipar ou MIGRAR código Node/TS existente: regra escoteiro (escopo-diff), higiene de npm, TypeScript estrito incremental, ESM/CJS, monorepo/workspaces, versão/EOL do runtime, prototype pollution/ReDoS, strangler-fig na saída para Go/Rust. Dispara em tarefas com Node, npm/pnpm/yarn, package.json, tsconfig, Express/Nest/Fastify, npm audit, ESM, workspaces. PHP é refatorado (ver go/rust). Frontend Node (Next/Astro) é do schematize-web.
+description: Padrões da casa para MANUTENÇÃO de código legado em Node.js/TypeScript — não para criar serviço backend novo (isso vai para o rol sancionado, por fit + ADR). Use ao revisar, corrigir, otimizar (só perf exigida), tipar ou MIGRAR código Node/TS existente: regra escoteiro (escopo-diff), higiene de npm, TypeScript estrito incremental, ESM/CJS, monorepo/workspaces, versão/EOL do runtime, prototype pollution/ReDoS, strangler-fig na saída para Go/Rust. Dispara em tarefas com Node, npm/pnpm/yarn, package.json, tsconfig, Express/Nest/Fastify, npm audit, ESM, workspaces. PHP é refatorado (ver go/rust). Frontend Node (Next/Astro) é do schematize-web.
 ---
 
 # Padrões de Engenharia da Casa — Node.js/TypeScript legado (manutenção)
@@ -13,7 +13,7 @@ Node como **linguagem de serviço backend está em saída**. Esta skill governa 
 
 ## Posição da stack (leia primeiro)
 
-- **Nenhum serviço backend novo em Node.** Backend novo nasce em **Go** (`schematize-go`) ou **Rust** (`schematize-rust`).
+- **Nenhum serviço backend novo em Node.** Backend novo nasce numa linguagem do **rol sancionado** — Go, Rust, Elixir, C#, Zig ou Ruby — escolhida por **fit + ADR** (`schematize-engineering` → `references/linguagens.md`), com a skill irmã correspondente.
 - **Nova funcionalidade NUNCA nasce em Node** — nem dentro de um módulo Node existente. Ela sai como **módulo Go/Rust novo**. No Node só entra **correção de comportamento que já existe** (bug, requisito mudado, brecha de segurança).
 - **Node que funciona, fica.** Não se refatora Node em produção por estética. Não há prazo/SLA forçado de migração: só se mexe/migra quando **você toca aquilo** (e cruza o gatilho) **ou** quando é solicitado/exigido. (Contraste: PHP é dívida ativa — ver `schematize-go`/`rust` §3.2.)
 - **Frontend Node é 100% permitido** e é do **`schematize-web`** (Next.js/Astro). Fronteira por **tipo de processo** (ver abaixo).
@@ -69,6 +69,36 @@ Legado não se traz inteiro ao padrão num PR de fix. Portanto:
 - **Graceful shutdown / SIGTERM / draining** (liga com independência de runtime); `unhandledRejection`/`uncaughtException` → log com `trace_id` + encerra gracioso, nunca engole.
 - **Segurança JS-específica:** **prototype pollution** (merge/lodash), **ReDoS**, `child_process`/`vm`/`eval` com input, path traversal, SSRF em fetch server-side. Detalhe em `references/riscos-node.md` e `references/seguranca.md`.
 
+## Precedência e herança (leia antes de divergir)
+
+Esta skill é o **recorte Node/TypeScript** da base. Duas regras governam a relação, e elas resolvem sozinhas
+quase toda dúvida de "onde está escrito o quê":
+
+1. **Onde esta skill divergir da base, a BASE MANDA.** `schematize-engineering` é a normativa; aqui
+   mora a **especialização** — o mecanismo, a lib, a sintaxe, o gate da linguagem. Divergência de
+   *piso* entre este arquivo e a base é **defeito desta skill**, não uma variante local aceitável.
+   Achou uma? É item de correção, não licença. *(Foi assim que o `argon2id-only` da casa virou
+   "argon2id ou PBKDF2" em uma skill só, e o rol de 6 linguagens virou "só Go e Rust" em três.)*
+2. **O que não está repetido aqui é HERDADO, não dispensado.** A ausência de um piso neste repo
+   nunca significa que ele não vale — significa que ele não muda de forma nesta linguagem. Em
+   especial, valem integralmente, sem cópia local:
+   - **§28 Archive** — `<projeto>/<projeto>_archive/` é **repositório git próprio, PRIVADO e
+     obrigatório**, criticidade 0 (`schematize-archive`; ADR-0005 para a planta canônica).
+   - **§39 Índice/MAPA** — enumeração exaustiva (uma entrada por unidade chamável, `M == N`) e o
+     **grafo com arestas em ASCII (`A -> B`), NUNCA a seta unicode** — o parser do app lê ASCII.
+   - **§35 Definition of Done** e a lista de anti-padrões **§37** (citada por **título**, nunca por
+     número: a numeração dos itens diverge entre skills).
+   - **IAM** (`schematize-engineering` → `references/iam.md`): identidade ≠ email, ≥2 fatores, ReBAC multi-tenant,
+     **alcançabilidade do 2º fator** (o fator de recuperação tem de ser alcançável quando o
+     principal cai — senão o 2FA vira bug de bootstrap que tranca o dono para fora), os parâmetros
+     mínimos de argon2id, sessão longa e logout irreversível.
+   - **Rol sancionado** — Go, Rust, Elixir, C#, Zig, Ruby, por **fit + ADR**
+     (`schematize-engineering` → `references/linguagens.md`). Esta skill é **uma** delas, não a
+     régua das outras.
+   - **Efeito externo** nunca sai de não-produção (`schematize-engineering` →
+     `references/efeitos-externos.md`; gate em `scripts/check-external-effects.sh`, distribuído
+     aqui — ADR-0008).
+
 ## Comandos (Claude Code)
 
 Prefixados `node-` — convivem sem conflito com `go-*`, `rust-*`, `web-*`.
@@ -91,7 +121,7 @@ Mesmos das skills go/rust — leia o reference; **aplicados ao que você toca**:
 
 - **Arquitetura/DDD, repos `<projeto>_<contexto>[_<lang>]`, `<projeto>_ops`, independência de runtime** (cada serviço sobe e funciona sozinho; falha ao notificar outro → persiste/loga/alerta/retoma).
 - **Fluxo de ambientes e ops (`references/ops.md`).** Toda mudança segue **dev local → teste local → GitHub → hml → prd**; **VETADO editar código direto no servidor** (hml/prd é imutável por edição manual, recebe só artefato do git). **100%** das operações no servidor (install/update/correção/config/migrate/rollback) passam pela **ferramenta do `<projeto>_ops`** — nunca à mão; o ops é **autônomo** (o usuário provisiona o servidor do zero sem a IA). **Instalação sempre paralela** = `nproc`; **falha no paralelo = serviços não independentes → corrigir a independência é prioridade máxima** (não serializar pra mascarar). (`/node-ops`)
-- **Deploy destrutivo por seed + isolamento por usuário (`references/ops.md` §2–§3).** O ops provisiona em **`/<app>/`** clonando os repos dentro; **`/<app>/.env` é o seeder global** (fonte única de config). **Todo redeploy é destrutivo na aplicação** — apaga a anterior e recria um clone zerado só com o seed (idempotente/sem drift), **preservando os dados** (migration reversível; `ops reset` de dados só em dev/hml). **Cada serviço roda como user Linux próprio em systemd unit hardened** (blast radius mínimo). Tudo automatizado pelo ops. (`/node-ops`)
+- **Deploy destrutivo por seed + isolamento por usuário (`schematize-engineering` -> `references/ops.md` §2–§3).** O ops provisiona em **`/<app>/`** clonando os repos dentro; **`/<app>/.env` é o seeder global** (fonte única de config). **Todo redeploy é destrutivo na aplicação** — apaga a anterior e recria um clone zerado só com o seed (idempotente/sem drift), **preservando os dados** (migration reversível; `ops reset` de dados só em dev/hml). **Cada serviço roda como user Linux próprio em systemd unit hardened** (blast radius mínimo). Tudo automatizado pelo ops. (`/node-ops`)
 - **Segurança** (segredo nunca no cliente, SQL parametrizado, auth server-side) + os riscos Node acima.
 - **IAM — migrar o auth legado é PRIORIDADE 0 (acima do gatilho 30/50 de saída).** O auth legado típico (Passport/express-session/**JWT no `localStorage`**/`bcrypt`/**email como ID**/**1 fator**/authz por coluna/**monolith apensado**) é dívida de segurança — porta-se pro **IAM da casa como app SEPARADA** (Go/Rust em `auth.<domain>`, OIDC/PKCE, JWKS público) por **strangler-fig**: mapeia `users`→**ID interno imutável** (email≠ID, dedupe), **re-hash preguiçoso** (bcrypt→argon2id), **JWT sai do `localStorage`**, **força 2º fator no 1º login**, **revoga sessões legadas**, **re-deriva a authz no ReBAC** (nunca confia na coluna legada; deny-default, token fino), **sessão 7d/90d**, **logout irreversível**. Paridade provada antes do cutover; concluído = **auth legado deletado**. Detalhe em `references/iam.md`; `/node-iam`; testes na `schematize-pentest`.
 - **Efeito externo NUNCA sai de não-produção — repo-wide, NÃO escopo-diff.** E-mail, SMS/voz, push, webhook de terceiro e cobrança **não acontecem de verdade** fora de `prd`. Em Node: transporte **sink** por default (`nodemailer` com **`jsonTransport`/`streamTransport`**, ou o **SMTP do Mailpit** quando você quer uma caixa com API HTTP pro teste ler) e **real só em `prd`** (credencial por `required()` — ausente, o processo **não sobe**, em vez de sinkar calado); o guard é um **wrapper do `sendMail`** (`GuardedMailer`) que **lança erro tipado** (`ExternalRecipientBlockedError`) para destinatário fora do domínio de teste — **VETADO** `.catch(() => {})` em cima da recusa. **Cap por execução** (`MAIL_MAX_PER_RUN`, default 50) com abort, **fail-closed** (`APP_ENV` ausente/desconhecido ⇒ não-prd), **chave sandbox** fora de prd, e `no-restricted-imports` no ESLint proibindo importar `nodemailer`/`resend` fora de `src/mail/` (fecha o bypass "chamei o SDK direto"). Todo endereço sintético (teste, fixture, seed, script) é `<papel>+<run-id>-<n>@test.<domain>` — **rota nula** (null MX RFC 7505 + SPF `-all` + DMARC `p=reject`) ou TLD reservado (`.test`/`.invalid`/`.example`); **VETADO** `@gmail.com`, domínio de terceiro, e-mail de pessoa real (inclusive o seu) e o domínio de produção. Entregar de verdade fora de prd exige **as cinco** (ADR + allowlist ≤5 + cap + janela + subdomínio separado). Motivo: bounce/complaint em massa **queima IP e domínio** e derruba o transacional de prd — inclusive o **OTP de login**. Código, wrapper e testes em `references/iam.md` §3.1; normativa em `schematize-engineering` → `references/efeitos-externos.md`.
