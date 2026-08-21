@@ -1,5 +1,24 @@
 # Changelog — schematize-node
 
+Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
+com versionamento [SemVer](https://semver.org/lang/pt-BR/).
+
+## [0.12.0] — 2026-08-21
+Saneamento do catálogo conforme a vistoria de 2026-08-21.
+
+### Adicionado
+- **`require(esm)`** (`references/riscos-node.md`) — a mudança que mais alivia legado: a dependência que virou **ESM-only** deixou de exigir migração big-bang. Com os dois limites que fazem tropeçar: top-level `await` lança `ERR_REQUIRE_ASYNC_MODULE`, e o retorno é o **namespace** (o default está em `.default`).
+- **Permission model** (`--permission`) — *a alavanca de hardening mais direta para um processo legado que ninguém vai reescrever*: dep comprometida que tente ler `~/.ssh/id_rsa` ou dar `spawn` **falha**, sem auditar 900 dependências. Com o modo de ligar **medindo** e os limites honestos (não é sandbox de rede).
+- **`erasableSyntaxOnly` + `verbatimModuleSyntax`** (`references/typescript-estilo.md`) — o que separa `node script.ts` de precisar de bundler, com os substitutos das quatro sintaxes não-apagáveis.
+
+### Corrigido
+- **Toolbelt viável** (`references/stack-versoes.md`): `ts-migrate` saiu (parado — *codemod abandonado num repo legado é pior que nenhum*), e `ts-morph`/`type-coverage` ficaram com a restrição escrita: dependem da **API programática do compilador**, que **não está exposta no TS 7**.
+- **CSPRNG de Node** (`references/seguranca.md`): o texto prescrevia `crypto/rand`, que é o pacote do **Go**. Agora é `node:crypto` (`randomBytes`, `randomUUID`, `webcrypto.getRandomValues`, `randomInt`), com `timingSafeEqual` e a pegadinha do mesmo tamanho.
+- **pnpm coerente com o mandato**: a skill **veta green-field em Node**, então "pnpm é preferido em projeto novo" era conselho que ela não tem como dar. A escolha para projeto novo voltou para a `schematize-web`.
+
+### Mudado
+- `anti-padroes.md`, `arquitetura.md` e `entrega.md` viraram **ponteiro** (poda mecânica).
+
 ## [0.11.0] — 2026-08-20
 Piso novo: **efeito externo NUNCA sai de não-produção** — recorte Node/TS (nodemailer + wrapper do `sendMail`) da normativa `schematize-engineering` → `references/efeitos-externos.md`. **Vale igual no legado: legado em saída não ganha desconto de piso.**
 ### Adicionado
@@ -11,14 +30,10 @@ Piso novo: **efeito externo NUNCA sai de não-produção** — recorte Node/TS (
 - **references/testes.md §22**: item obrigatório — teste nunca dispara efeito externo real (sink, endereço `@test.<domain>`, teste vermelho do guard e do cap).
 - **assets/CLAUDE.md**: piso 14 com o recorte Node (sink/wrapper/erro tipado/cap/fail-closed/rota nula), a nota "repo-wide, não escopo-diff" e o motivo (queima de IP e domínio derruba o OTP de produção).
 
-
 ## [0.10.2] — 2026-08-18
 Correção da contradição do muro pré-login de IAM (alinha ao `iam.md` da schematize-engineering).
 ### Mudado
 - **/node-iam**: removido o "2º fator forte obrigatório antes do acesso pleno" e o "força 2º fator no 1º login" — o muro pré-login / deadlock de bootstrap VETADO pela norma. Agora senha+Email OTP = 2FA baseline; fator forte é nudge + step-up just-in-time.
-
-
-Formato: [Keep a Changelog]; versionamento: SemVer. Skill de **manutenção de legado**
 Node.js/TypeScript, com saída gradual para Go/Rust. Não serve para backend novo.
 
 ## [0.10.1] — 2026-08-18

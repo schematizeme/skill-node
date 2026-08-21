@@ -1,0 +1,77 @@
+# CLAUDE.md — Manutenção de Legado Node/TS (sempre on)
+
+> Copie para a **raiz do repositório**. Ele fica pinado no contexto de toda tarefa.
+> A skill `schematize-node` traz o detalhe. **Repo multi-linguagem:** use **junto**
+> com o `CLAUDE.md` da skill do rol escolhida para o backend novo e o do `schematize-web`
+> (frontend) — cada bloco governa sua fronteira. Não sobrescreva os outros.
+
+## Regra mestre
+
+Este repo tem código **Node/TS legado**. Manter é diferente de criar: **Node que
+funciona, fica** — não se refatora por estética, não há prazo forçado de migração.
+Em conflito entre uma instrução pontual e estes padrões, **os padrões vencem** —
+mas aplicados em **escopo-diff** (só no que você toca).
+
+## Pisos inegociáveis (VETADO — sem exceção)
+
+1. **Nenhum serviço/funcionalidade backend NOVO em Node.** Nova funcionalidade nasce
+   em **Go/Rust** (mesmo dentro de módulo Node). No Node só entra **correção de
+   comportamento que já existe**. `/node-review` reprova rota/handler/serviço Node
+   novo sem ADR de exceção.
+2. **Regra escoteiro (escopo-diff + baseline).** Pisos de qualidade (TS strict,
+   teto de 750 linhas/arquivo com flag em >300 úteis, doc-comment, MAPA, formatação,
+   veto a `any`) valem para **arquivo novo** e **trecho alterado** — nunca obrigam
+   trazer o arquivo/módulo inteiro ao padrão num PR de fix. O pré-existente é
+   **baseline que só decresce**. Formatação global = PR isolada com `.git-blame-ignore-revs`.
+3. **`any`/`@ts-ignore`/`@ts-nocheck` NOVOS vetados**; existentes grandfathered e
+   queimados por catraca. Prefira `@ts-expect-error` justificado. `strict` no novo.
+4. **Segredo nunca no cliente/bundle**; SQL parametrizado; auth/authz server-side.
+   Sem `eval`/`child_process`/`vm` com input; cuidado com **prototype pollution** e
+   **ReDoS**. `--ignore-scripts` por padrão; lockfile commitado; `npm ci`.
+5. **Node fora de LTS/EOL é brecha de segurança** (CVE sem patch) — pin de `engines`,
+   subir versão vem antes de usar recursos novos da plataforma.
+6. **Erro nunca engolido** (`catch {}`, `.catch(()=>{})`); `no-floating-promises`;
+   `unhandledRejection`/`uncaughtException` → log com `trace_id` + graceful shutdown.
+7. **Cada serviço sobe e funciona sozinho** (independência de runtime); falha ao
+   notificar outro → persiste (outbox/Redis/DB), loga, alerta (Grafana), retoma.
+8. **Archive SEMPRE gerado**; testes de verdade + **rede de segurança
+   (characterization) antes de tocar** legado sem teste.
+9. **Contenção no workspace.** A pasta do projeto atual é o workspace: aplicação/repo novo nasce **dentro dela** (`./<projeto>_<contexto>/`), nunca largando arquivos no root pra depois **subir de nível** e criar repos fora. **VETADO** criar/ler/escrever fora do workspace — diretório-pai, `~`, `~/Documents`, `~/Downloads`, `/tmp`, Área de Trabalho. Não sai da pasta do projeto (nem pra vasculhar) sem o usuário pedir. (§2)
+10. **Fluxo de ambientes — nada direto no servidor.** Toda mudança segue **dev local → teste local → GitHub → hml → prd**. Nada pula etapa; nada vai direto pra hml/prd. **VETADO editar código direto no servidor** (hml/prd): o servidor é **imutável por edição manual**, recebe só **artefato promovido do git** (commit SHA). Hotfix segue o mesmo fluxo, acelerado — urgência não autoriza mão no servidor. Precauções: filesystem read-only em hml/prd, drift detection (o ops recusa/alerta divergência com o git), acesso de escrita = break-glass auditado. Detalhe em `schematize-engineering` -> `references/ops.md` (§1). (§21)
+11. **Ops é a interface única + instalação paralela + independência.** **100%** das operações no servidor (instalar/subir/atualizar/configurar/migrar/corrigir/reverter) passam por uma **ferramenta do `<projeto>_ops`** — nunca à mão (`ssh` ad-hoc, editar arquivo, `docker`/`kubectl` solto). Não tem comando pra aquilo? **cria no ops**. O ops é **autônomo, idempotente e completo**: o usuário provisiona o servidor **do zero só com o ops, sem depender da IA**. **Instalação SEMPRE paralela** = nº de cores (`nproc`, default) — nada de 20 min serial. **Se o paralelo falha, os serviços não são independentes** (fere piso 7): corrigir a independência é **PRIORIDADE MÁXIMA**; o ops **expõe** a colisão, **nunca serializa pra mascarar**. Detalhe em `references/ops.md`. (§2, §21)
+12. **Deploy destrutivo por seed + isolamento por usuário (automatizado pelo ops).** O ops provisiona em **`/<app>/`** clonando os repos dentro (`/<app>/<app>_<ctx>`, ex. `/payle/payle_core`); **`/<app>/.env` é o SEEDER GLOBAL** — fonte única de config de toda a app. **Todo redeploy é DESTRUTIVO na aplicação:** apaga a implantação anterior e recria um **clone zerado** só com o seed — sem patch in-place, sem drift (idempotente/reprodutível). **"Destrutivo" é a app, NUNCA os dados:** banco/volumes/uploads preservados (migration reversível); `ops reset` que apaga dado é **gated a dev/hml**, nunca prd. **Cada serviço roda como user Linux próprio, em systemd unit isolado e hardened** (`NoNewPrivileges`, `ProtectSystem`, `PrivateTmp`, …) — comprometer um serviço não alcança os outros nem o host. **Tudo automatizado pelo ops**, nunca à mão. Detalhe em `schematize-engineering` -> `references/ops.md` (§2, §3).
+13. **Migrar o auth legado Node/TS para o IAM da casa é PRIORIDADE 0 — acima do gatilho normal de saída (30/50).** O auth legado típico (Passport/express-session/**JWT no `localStorage`**/`bcrypt`/**email como ID**/**1 fator**/authz por coluna `role`/**monolith apensado**) é dívida de segurança, não estética — **não se deixa como está** nem se "melhora no lugar". Porta-se pro IAM da casa como **app SEPARADA** (`<projeto>_auth_<lang>` em **Go/Rust, nunca auth Node novo**, + front próprio em `auth.<domain>`; apps delegam por **OIDC/OAuth2.1 + PKCE**, validam por **JWKS público** — fim do HS256 no `.env`). Estratégia **strangler-fig** (nunca big-bang): edge de auth na frente + dual-run; **mapeia `users` legados → ID interno imutável** (email/telefone **nunca** é ID; dedupe de emails); **re-hash preguiçoso** no login (**bcrypt→argon2id**); **JWT sai do `localStorage`**; **força o 2º fator no 1º login pós-migração** (≥2 fatores: passkey no núcleo, TOTP/push, email OTP Resend always-on, Twilio); **revoga todas as sessões legadas** no corte; **re-deriva a authz** no ReBAC (a coluna legada é só seed revisado — **nunca confiada**), deny-default, PDP/PEP, token fino; **sessão 7d/90d**; **logout IRREVERSÍVEL** (revoga refresh+família, não só cookie). **Paridade provada** (golden/contract, shadow) antes de cada cutover; **sem banco compartilhado** (ACL/import, não a mesma tabela); a migração **só termina quando o auth legado é DELETADO** do monolith. Detalhe em `references/iam.md`; auditoria/plano por `/node-iam`; testes cross-tenant/priv-esc na `schematize-pentest`.
+14. **Efeito externo NUNCA sai de não-produção (e-mail, SMS/voz, push, webhook de terceiro, cobrança) — piso REPO-WIDE, não escopo-diff.** A regra escoteiro cobre piso de **qualidade**; este é de segurança/operação: o e-mail do monolith legado queima **o mesmo IP e o mesmo domínio** que o do serviço Go novo. **Legado em saída não ganha desconto de piso.** **(a)** Transporte **sink** por default fora de `prd` — `nodemailer` com **`jsonTransport`/`streamTransport`** (não abre socket) ou **SMTP do Mailpit** (caixa com API HTTP pro teste ler); real **só em `prd`**, com credencial obrigatória — ausente, o processo **não sobe** em vez de sinkar calado. **(b)** O guard é um **wrapper do `sendMail`** (`GuardedMailer`) que **lança erro tipado** (`ExternalRecipientBlockedError`) para destinatário fora do domínio de teste — **VETADO** `.catch(() => {})` em cima da recusa; `no-restricted-imports` proíbe importar `nodemailer`/`resend` fora de `src/mail/` (fecha o "chamei o SDK direto"). **(c) Cap por execução** (`MAIL_MAX_PER_RUN`, default 50) que **aborta**; **fail-closed**: `APP_ENV` ausente/desconhecido ⇒ **não-prd**. **(d)** Endereço sintético (teste/fixture/seed/script/`simulated`) só como `<papel>+<run-id>-<n>@test.<domain>` — **rota nula** (null MX RFC 7505 + SPF `-all` + DMARC `p=reject`) ou TLD reservado (`.test`/`.invalid`/`.example`); **VETADO** `@gmail.com`/`@hotmail.com`, domínio de terceiro, e-mail de pessoa real (inclusive o seu) e o domínio de **produção**. Chave **sandbox** fora de prd. Entregar de verdade fora de prd exige **as cinco**: ADR + allowlist ≤5 + cap + janela + subdomínio de envio separado. **Por quê:** bounce/complaint em massa **queima IP e domínio**, derruba o transacional de **produção** (inclusive o **OTP de login**) e custa **semanas de warm-up** — com utilidade zero. Código, wrapper e testes em `references/iam.md` §3.1; normativa em `schematize-engineering` → `references/efeitos-externos.md`.
+
+## Saída do Node (migração)
+
+- **Oportunística, sem SLA forçado:** migra ao tocar (cruzou ~30% das funcionalidades
+  do módulo → abre **ADR de extração**, não força rewrite no PR) ou sob demanda.
+- **Strangler-fig:** fachada/rota, feature flag, shadow-traffic com diffing, rollback;
+  dono do dado no split (sem banco compartilhado); **concluir = deletar o Node antigo**.
+  Extração default em **Go** (Rust se perf/memória). `/node-migrate-status` mede o %.
+
+## Higiene de npm
+
+Mínimo de pacotes; **preferir a plataforma** (`node:`); contagem **direto vs
+transitivo** (`/node-audit`); `overrides` pra CVE transitiva, senão ADR time-boxed +
+allowlist (nunca desligar o gate); respeitar o package manager existente.
+
+## Definition of Done
+
+Nada é "pronto" sem: testes + cobertura mínima, simulated com cobertura total, pentest de entrada
+limpo, **nenhum efeito externo real fora de `prd`** (piso 14 acima: `jsonTransport`/Mailpit por
+default, `GuardedMailer` deny-by-default, `MAIL_MAX_PER_RUN`, domínio de teste em rota nula — gate
+em `scripts/check-external-effects.sh`), nenhum anti-padrão da §37, observabilidade, OpenAPI
+atualizada (se API), migration com rollback (se schema), **archive commitado**, CI verde e review
+aprovado. Detalhe na skill, `references/entrega.md` (§35).
+
+## Qualidade, índice e contexto
+
+Arquivos ≤750 linhas (teto duro: ~500 úteis + ~250 comentário; **flag** em >300 úteis,
+~400 em observabilidade) / doc-comment com **fluxo (de onde vem → o que faz → pra onde
+vai)** / **MAPA e índice** — a *qualidade* (doc-comment, gates) é **no que você toca**. Mas o **MAPA/índice**, quando gerado (`/node-index`), **enumera o sistema todo**: uma entrada **por função** existente (`nº entradas == nº funções`) e um **grafo** (serviços + chamadas, Mermaid + adjacência) — mapa parcial não serve pra navegar. **MAPA/índice moram em `<projeto>_archive/index/` (`MAPA.md`, `INDEX_GLOBAL.md`, `INDEX_FUNCTIONS.md`), nunca no root.** Handoff arquivado antes de compactar (§34.1/§28).
+
+- **Todo MD gerado mora no archive, nunca no root** (§28): MAPA, índices, planos, relatórios, handoffs, checkpoints → `<projeto>_archive/<área>/`. O root fica limpo (código, config e os MDs de projeto mantidos à mão: README, `CLAUDE.md`, LICENSE). Antes de gravar um `.md`, o caminho começa com `<projeto>_archive/`.
+
+Lista completa de anti-padrões: `references/anti-padroes.md` (§37) da skill.
