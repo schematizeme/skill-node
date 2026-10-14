@@ -19,6 +19,8 @@ Saneamento da skill: o que `SKILL.md` e o comando `/node-audit` prometiam agora 
 
 ### Removido
 - `assets/lint/.golangci.yml` (config Go dentro da skill Node) e `assets/lint/eslint.layers.cjs` (eslintrc antigo, migrado para flat config); repetição do bloco "Sem frota ociosa" que já vem no bloco herdado.
+- **Description** reduzida (~270 chars) para caber no orçamento de listagem (soma das 31 skills ≤ 8500; o Claude Code corta a listagem acima disso).
+- **CI:** actions de terceiros pinadas por SHA completo com comentário `# vX.Y.Z` (mesma major em uso; supply chain), mesmo SHA em todas as skills.
 
 ## [0.13.2] — 2026-09-30
 O piso de orquestração passa a ser **herdado** da base em vez de copiado à mão: uma mudança na engineering não exige mais editar 38 arquivos.

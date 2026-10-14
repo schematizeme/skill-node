@@ -4,8 +4,8 @@ metadata:
   version: 0.13.2
 description: >-
   Manutenção e migração de legado Node.js/TypeScript (package.json, tsconfig, npm/pnpm, Express/Nest/Fastify):
-  escopo-diff, higiene de deps, TS estrito incremental, ESM/CJS, EOL do runtime e saída gradual para o rol sancionado.
-  Não cria serviço backend novo; frontend Next/Astro é da schematize-web.
+  escopo-diff, higiene de deps, TS estrito incremental, ESM/CJS, EOL do runtime. Não cria serviço novo; Next/Astro é
+  da schematize-web.
 ---
 
 # Padrões de Engenharia da Casa — Node.js/TypeScript legado (manutenção)
