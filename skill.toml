@@ -3,7 +3,7 @@ name = "schematize-node"
 tag = "Backend legado · Node/TS"
 status = "beta"
 order = 4
-current_version = "0.14.0"
+current_version = "0.14.1"
 requires = ["engineering"]   # o piso vem da base; esta skill so especializa (SKILL.md, "Precedencia e heranca")
 href = "/node"
 

@@ -1,0 +1,13 @@
+slug = "node"
+name = "schematize-node"
+tag = "Backend legado · Node/TS"
+status = "beta"
+order = 4
+current_version = "0.14.1"
+requires = ["engineering"]   # o piso vem da base; esta skill so especializa (SKILL.md, "Precedencia e heranca")
+href = "/node"
+
+[descriptions]
+pt = "Manutenção de legado Node.js/TypeScript e saída gradual para o rol sancionado — sem reescrever o que funciona."
+en = "Node.js/TypeScript legacy maintenance and gradual exit to the sanctioned roster — without rewriting what works."
+es = "Mantenimiento de legado Node.js/TypeScript y salida gradual al rol sancionado — sin reescribir lo que funciona."
