@@ -1,4 +1,4 @@
-# Saída do Node → Go/Rust (strangler-fig)
+# Saída do Node → rol sancionado (strangler-fig)
 
 > Parte da skill **schematize-node**. O "como" da migração incremental e segura. O "quando" (gatilho) mora aqui e no SKILL.md; este arquivo é o mecanismo.
 
@@ -16,11 +16,11 @@ Node backend está em saída, mas **sem prazo forçado**: migra-se **oportunisti
 
 ## Mecânica do estrangulamento
 
-1. **Fachada/roteamento na frente:** um proxy reverso ou router in-process decide, **por rota/feature**, se a requisição vai pro Node antigo ou pro serviço Go/Rust novo. O cliente não sabe da troca.
+1. **Fachada/roteamento na frente:** um proxy reverso ou router in-process decide, **por rota/feature**, se a requisição vai pro Node antigo ou pro serviço novo. O cliente não sabe da troca.
 2. **Feature flag de cutover:** virar rota do velho→novo é flag, reversível em segundos.
 3. **Shadow / dark traffic com diffing:** antes de virar a chave, o novo recebe **cópia** do tráfego real e sua saída é **comparada** com a do Node (diff). Só vira quando a paridade está provada.
 4. **Rollback** definido e testado (voltar a flag; o Node antigo ainda está lá até o passo 6).
-5. **Contract/golden tests** fixam o comportamento do Node **antes** da extração (Pact ou fixtures gravadas) — o substituto Go/Rust tem que bater. Extração sem isso é aposta.
+5. **Contract/golden tests** fixam o comportamento do Node **antes** da extração (Pact ou fixtures gravadas) — o substituto tem que bater. Extração sem isso é aposta.
 6. **Concluir = DELETAR o Node antigo.** Migração que não apaga o legado deixa dois serviços vivos servindo a mesma coisa — pior que antes. A funcionalidade só está "migrada" quando o código Node correspondente foi removido e a fachada não roteia mais pra ele.
 
 ## Dono do dado durante o split
@@ -29,9 +29,9 @@ Node backend está em saída, mas **sem prazo forçado**: migra-se **oportunisti
 - Comunicação Node↔novo por **HTTP/gRPC/evento**, com **Anti-Corruption Layer** traduzindo o modelo de um lado pro outro.
 - Se ambos precisam do mesmo dado na transição: um é dono (escreve), o outro lê por API/evento/réplica read-only com contrato — nunca dois escritores no mesmo dado sem contrato.
 
-## Go ou Rust no ponto de extração
+## Qual linguagem do rol no ponto de extração
 
-- **Sem default: a linguagem sai de fit + ADR** (`schematize-engineering` → `references/linguagens.md`), como qualquer serviço novo da casa. Guia rápido para o pedaço extraído: **Go** para serviço de rede/API concorrente e tooling; **Rust** quando é **performance-crítico ou exige segurança de memória** (`schematize-rust`). Decisão registrada no ADR de extração.
+- **Sem default: a linguagem sai de fit + ADR** (`schematize-engineering` → `references/linguagens.md`), como qualquer serviço novo da casa. Guia rápido de fit para o pedaço extraído: **Go** para serviço de rede/API concorrente e tooling; **Rust** para segurança de memória crítica (auth, cripto, parsing hostil); **Elixir** para realtime/BEAM; **C#** para ecossistema .NET; **Ruby** para DX de produto (Rails); **Zig** para baixo nível — cada uma com sua skill irmã. Decisão registrada no ADR de extração.
 
 ## Independência durante a coexistência
 

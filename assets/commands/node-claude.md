@@ -10,4 +10,4 @@ Sincronize o **`CLAUDE.md` da raiz** deste repositório com a versão **atual** 
 4. **Se não existe:** crie a partir do `assets/CLAUDE.md` da skill.
 5. Confirme ao usuário: caminho, se sobrescreveu/mesclou, e se gerou backup.
 
-Este é o jeito **explícito de atualizar um `CLAUDE.md` que já existe** — rodar não pode deixar a versão antiga. Num repo com Node + Go/Rust + Web, espere **um `CLAUDE.md` com seções por skill** (rode `/go-claude`/`/rust-claude`/`/web-claude` para as demais).
+Este é o jeito **explícito de atualizar um `CLAUDE.md` que já existe** — rodar não pode deixar a versão antiga. Num repo com Node + linguagem(ns) do rol + Web, espere **um `CLAUDE.md` com seções por skill** (rode `/go-claude`/`/rust-claude`/`/web-claude` para as demais).

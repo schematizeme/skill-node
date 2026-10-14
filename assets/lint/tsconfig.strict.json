@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "_comment": "schematize-node -- base ESTRITA para codigo novo/tocado. Use `\"extends\": \"./tsconfig.strict.json\"` (ou copie as opcoes). Para ESM exige \"type\":\"module\" no package.json (ou .mts); em CJS legado, ligue `verbatimModuleSyntax` so apos converter o modulo. Para ESM exige type:module no package.json (ou .mts); em CJS legado, so ligue verbatimModuleSyntax apos converter o modulo. Legado entra por catraca: comece com checkJs + noImplicitAny por pasta, sem `strict` global (references/typescript-estilo.md).",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "useUnknownInCatchVariables": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "erasableSyntaxOnly": true,
+
+    "noEmit": true
+  },
+  "include": ["src", "test"],
+  "exclude": ["node_modules", "dist"]
+}

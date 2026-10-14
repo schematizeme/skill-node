@@ -1,12 +1,12 @@
 # Anexo A — números voláteis (limiares e versões)
 
-> Parte da skill **schematize-node**. **Fonte volátil** — versões e limiares mudam. Atualize aqui (revisão trimestral) sem mexer no corpo normativo. **Verificado em: 2026-08-21**. Sempre confirme o número atual antes de aplicar como gate.
-> Conferido no `nodejs.org/dist/index.json` nesta data: **LTS Active = 24.19.0 (Krypton)**; 22.23.2 (Jod) em manutenção; **26.7.0 é *Current*, NÃO-LTS** (vira LTS em out/2026); 20 (Iron) e 18 (Hydrogen) fora da janela recomendada.
+> Parte da skill **schematize-node**. **Fonte volátil** — versões e limiares mudam. Atualize aqui (revisão trimestral) sem mexer no corpo normativo. **Verificado em: 2026-10-14**. Sempre confirme o número atual antes de aplicar como gate.
+> Conferido em 2026-10-14 no `nodejs.org/dist/index.json` e no `schedule.json` oficial (`github.com/nodejs/Release`): **LTS Active = 24 (Krypton, 24.21.0)**, que entra em *Maintenance* em 2026-10-20 (EOL 2028-04-30); **22 (Jod, 22.23.3)** em *Maintenance* (EOL 2027-04-30); **26 (26.11.1) é *Current*, ainda NÃO-LTS — vira LTS em 2026-10-28** (EOL 2029-04-30); **20 (Iron) está em EOL desde 2026-04-30** e 18 (Hydrogen) desde 2025-04-30 — rodar neles é brecha sem patch. 25 foi *Current* ímpar (EOL 2026-06-01). Releia o `schedule.json` antes de pinar: as datas mudam o que é "LTS alvo".
 
 ## Node runtime
 
 - **LTS suportada alvo:** a LTS "Active"/"Maintenance" corrente do Node (ver <https://nodejs.org/en/about/previous-releases>). Rodar em versão **fora de suporte** = piso de segurança violado (CVE sem patch).
-- `engines.node` pinado; imagem base por digest.
+- `engines.node` pinado; imagem base por digest. `scripts/node-audit.mjs` carrega uma tabela de EOL por major (`RUNTIME_EOL`): atualize-a junto deste anexo.
 - Recursos que exigem versão mínima (piso antes de usar): `fetch` global e `node:test` (Node ≥18), type-stripping de TypeScript (Node ≥22 atrás da flag `--experimental-strip-types`; **ligado por DEFAULT desde a 22.18 / 23 — a flag virou desnecessária** e citá-la faz parecer experimental o que já é padrão) — e **atenção**: type stripping só apaga sintaxe **apagável**, então `enum`, `namespace` e **parameter properties** (`constructor(private x: T)`) NÃO rodam; use `erasableSyntaxOnly` (TS ≥5.8) para o compilador cobrar isso, `structuredClone` (≥17).
 
 ## Limiares de dependências (sinal de saúde, não veredito cego)
@@ -46,3 +46,8 @@ Medidos por `/node-audit`. **Direto ≠ transitivo.**
 >   subir para o TS 7, essas ferramentas **param** — planeje a catraca de tipos contando com isso, ou
 >   fique no 6.x até a API voltar. É exatamente o tipo de restrição que dá para descobrir agora ou
 >   no dia do upgrade.
+>
+> **Lint (✔ verificado em 2026-10-14, `npm view`):** ESLint corrente **10.x** (a flat config de
+> `assets/lint/eslint.config.mjs` roda em 9+ e foi exercitada na 10); `typescript-eslint` 8.x declara
+> peer `typescript >=4.8.4 <6.1.0` — ou seja, **TypeScript 7.0.x (corrente) ainda não é suportado pelo
+> typescript-eslint**; mantenha o 6.0.x no projeto que usa lint type-aware.

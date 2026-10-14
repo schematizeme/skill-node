@@ -14,4 +14,4 @@ Este é **código legado**: não se traz o repositório inteiro ao padrão num P
 
 - **(1) arquivo NOVO**, e **(2) o TRECHO que você efetivamente alterou** ("boy-scout": deixe um pouco melhor o que tocou).
 
-Você **não** é obrigado a quebrar/documentar/reformatar o arquivo ou módulo inteiro só porque encostou nele. O **pré-existente** é um **baseline (dívida registrada) que só pode decrescer** — o gate mede o **diff**, nunca reprova um PR por dívida que já estava lá. Reformatação global = **PR isolada só-de-formatação** com `.git-blame-ignore-revs`. (Em green-field Go/Rust os pisos valem no arquivo todo; aqui, por ser legado, valem no que você toca.)
+Você **não** é obrigado a quebrar/documentar/reformatar o arquivo ou módulo inteiro só porque encostou nele. O **pré-existente** é um **baseline (dívida registrada) que só pode decrescer** — o gate mede o **diff**, nunca reprova um PR por dívida que já estava lá. Reformatação global = **PR isolada só-de-formatação** com `.git-blame-ignore-revs`. (Em green-field nas linguagens do rol os pisos valem no arquivo todo; aqui, por ser legado, valem no que você toca.)

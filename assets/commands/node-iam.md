@@ -30,7 +30,7 @@ Varra e reporte, arquivo:linha, o perfil do legado (`references/iam.md` §0):
 
 ## 2. Alvo (inegociável) — o IAM que a migração alcança
 Confirme/scaffolde o auth-alvo como **aplicação SEPARADA** (`references/iam.md` §1):
-- Serviço próprio `<projeto>_auth_<lang>` (**Go/Rust, nunca Node novo**) + front `<projeto>_authfront`,
+- Serviço próprio `<projeto>_auth_<lang>` (**linguagem do rol, nunca Node novo**) + front `<projeto>_authfront`,
   em **`auth.<domain>`** — user Linux + systemd isolados (casa com `schematize-engineering` -> `ops.md` §3). Monolith apensado = VETADO.
 - App principal (o monolith Node) e clientes **delegam por OIDC/OAuth2.1 + PKCE**; a chave de
   assinatura só no auth, o Node passa a **validar por JWKS público** (fim do HS256 no `.env`).
@@ -67,6 +67,6 @@ a partir da coluna legada, bypass do enrolamento forçado do 2º fator. Gate que
 Grave o plano/relatório em `<projeto>_archive/` (§28): inventário do auth legado (§1, arquivo:linha),
 gaps do checklist IAM (`references/iam.md`), o **mapa legado→novo** (schema `users`→identidade+identificadores),
 a **ordem de corte por coorte** e o critério de "concluído = auth legado deletado". Confirme: auth-alvo é app
-à parte (Go/Rust)? `users`→ID interno (email≠ID, deduplicado)? re-hash preguiçoso + JWT fora do `localStorage`?
+à parte (linguagem do rol)? `users`→ID interno (email≠ID, deduplicado)? re-hash preguiçoso + JWT fora do `localStorage`?
 2º fator forçado + sessões legadas revogadas? authz re-derivada no ReBAC (não confia na coluna)? sessão longa +
 logout irreversível? paridade provada antes do cutover? testes cross-tenant no CI? **Prioridade 0** — não deixe o legado como está.

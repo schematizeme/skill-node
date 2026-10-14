@@ -19,4 +19,4 @@ Mostre ao usuário a lista de comandos do conjunto **schematize-node** (manuten�
 | `/node-qa` | Q.A. no contexto Node/TS (aplica a schematize-qa: /qa-plan → /qa-run). |
 | `/node-index` | (Re)gera o índice de microfunções/MAPA a partir dos doc-comments. |
 
-Depois da tabela, diga em uma linha que esta skill é de **manutenção de legado** (Node backend em saída; funcionalidade nova nasce em Go/Rust), que quase tudo é **escopo-diff** (só no que você toca), e que o frontend Node é do `schematize-web`.
+Depois da tabela, diga em uma linha que esta skill é de **manutenção de legado** (Node backend em saída; funcionalidade nova nasce numa linguagem do rol), que quase tudo é **escopo-diff** (só no que você toca), e que o frontend Node é do `schematize-web`.

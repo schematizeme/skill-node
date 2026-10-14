@@ -2,20 +2,23 @@
 name: schematize-node
 metadata:
   version: 0.13.2
-description: Padrões da casa para MANUTENÇÃO de código legado em Node.js/TypeScript — não para criar serviço backend novo (isso vai para o rol sancionado, por fit + ADR). Use ao revisar, corrigir, otimizar (só perf exigida), tipar ou MIGRAR código Node/TS existente: regra escoteiro (escopo-diff), higiene de npm, TypeScript estrito incremental, ESM/CJS, monorepo/workspaces, versão/EOL do runtime, prototype pollution/ReDoS, strangler-fig na saída para Go/Rust. Dispara em tarefas com Node, npm/pnpm/yarn, package.json, tsconfig, Express/Nest/Fastify, npm audit, ESM, workspaces. PHP é refatorado (ver go/rust). Frontend Node (Next/Astro) é do schematize-web.
+description: >-
+  Manutenção e migração de legado Node.js/TypeScript (package.json, tsconfig, npm/pnpm, Express/Nest/Fastify):
+  escopo-diff, higiene de deps, TS estrito incremental, ESM/CJS, EOL do runtime e saída gradual para o rol sancionado.
+  Não cria serviço backend novo; frontend Next/Astro é da schematize-web.
 ---
 
 # Padrões de Engenharia da Casa — Node.js/TypeScript legado (manutenção)
 
-Node como **linguagem de serviço backend está em saída**. Esta skill governa **manter bem** o que já roda em Node/TS e **conduzir a saída** para Go/Rust de forma segura e incremental — **não** justifica código Node novo. Mesma base normativa das demais skills; o que muda é o ferramental Node/TS, a disciplina de saída, e o fato de que **quase tudo aqui é aplicado só ao que você toca** (legado não se reescreve inteiro).
+Node como **linguagem de serviço backend está em saída**. Esta skill governa **manter bem** o que já roda em Node/TS e **conduzir a saída** para o rol sancionado de forma segura e incremental — **não** justifica código Node novo. Mesma base normativa das demais skills; o que muda é o ferramental Node/TS, a disciplina de saída, e o fato de que **quase tudo aqui é aplicado só ao que você toca** (legado não se reescreve inteiro).
 
 **Versão:** skill `schematize-node` v0.13.2. Changelog em `CHANGELOG.md`.
 
 ## Posição da stack (leia primeiro)
 
 - **Nenhum serviço backend novo em Node.** Backend novo nasce numa linguagem do **rol sancionado** — Go, Rust, Elixir, C#, Zig ou Ruby — escolhida por **fit + ADR** (`schematize-engineering` → `references/linguagens.md`), com a skill irmã correspondente.
-- **Nova funcionalidade NUNCA nasce em Node** — nem dentro de um módulo Node existente. Ela sai como **módulo Go/Rust novo**. No Node só entra **correção de comportamento que já existe** (bug, requisito mudado, brecha de segurança).
-- **Node que funciona, fica.** Não se refatora Node em produção por estética. Não há prazo/SLA forçado de migração: só se mexe/migra quando **você toca aquilo** (e cruza o gatilho) **ou** quando é solicitado/exigido. (Contraste: PHP é dívida ativa — ver `schematize-go`/`rust` §3.2.)
+- **Nova funcionalidade NUNCA nasce em Node** — nem dentro de um módulo Node existente. Ela sai como **módulo novo numa linguagem do rol (fit + ADR)**. No Node só entra **correção de comportamento que já existe** (bug, requisito mudado, brecha de segurança).
+- **Node que funciona, fica.** Não se refatora Node em produção por estética. Não há prazo/SLA forçado de migração: só se mexe/migra quando **você toca aquilo** (e cruza o gatilho) **ou** quando é solicitado/exigido. (Contraste: PHP também é legado e migra por funcionalidade quando tocado — ver `schematize-engineering` → `references/linguagens.md` §2.)
 - **Frontend Node é 100% permitido** e é do **`schematize-web`** (Next.js/Astro). Fronteira por **tipo de processo** (ver abaixo).
 
 ## Regra escoteiro — o piso que rege tudo aqui (leia antes de qualquer gate)
@@ -31,10 +34,10 @@ Legado não se traz inteiro ao padrão num PR de fix. Portanto:
 
 > Sem a regra escoteiro, esta skill viraria um muro que impede a manutenção que ela diz proteger. Rigor onde há autoria; baseline onde há herança.
 
-## Saída do Node → Go/Rust (o "como", não só o "quando")
+## Saída do Node → rol sancionado (o "como", não só o "quando")
 
 - **Gatilho mensurável e NÃO-bloqueante.** "Funcionalidade" = **entrada no índice/MAPA** (§39); `%` = entradas afetadas ÷ total do módulo; "módulo" = um bounded context/pasta de contexto. Quando uma mudança cruza **~30%** das funcionalidades do módulo, **abre-se um ADR de extração no backlog** — **não** se força o rewrite dentro do mesmo PR (um hotfix de 1 linha nunca dispara reescrita cross-language). `/node-migrate-status` calcula o % por módulo a partir do índice.
-- **Extração incremental** (strangler-fig), nunca big-bang: proxy/roteamento por rota/feature entre Node antigo e Go/Rust novo, **feature flag de cutover**, **shadow/dark traffic com diffing** (compara saída Node vs Go em tráfego real antes de virar a chave), **rollback**. Detalhe em `references/migracao-saida.md`.
+- **Extração incremental** (strangler-fig), nunca big-bang: proxy/roteamento por rota/feature entre Node antigo e o serviço novo, **feature flag de cutover**, **shadow/dark traffic com diffing** (compara saída Node vs Go em tráfego real antes de virar a chave), **rollback**. Detalhe em `references/migracao-saida.md`.
 - **Dono do dado no split:** o serviço extraído é dono do seu schema; comunicação Node↔novo por HTTP/evento/**Anti-Corruption Layer**, **nunca** banco compartilhado (senão vira monólito distribuído, VETADO — §2).
 - **Migração só termina quando o Node antigo é DELETADO.** "50% extraído" não é "migra o resto de uma vez" (isso é big-bang) — é continuar extraindo até apagar o legado correspondente. Contract/golden tests provam paridade **antes** de desligar.
 
@@ -113,26 +116,32 @@ Prefixados `node-` — convivem sem conflito com `go-*`, `rust-*`, `web-*`.
 | `/node-iam` | audita/planeja a **migração do auth legado Node/TS** (Passport/JWT-no-localStorage/bcrypt/email-como-ID/1 fator/monolith) → **IAM da casa (app separada, prioridade 0, strangler-fig)**: mapeia `users`→ID interno, re-hash preguiçoso, força 2º fator, revoga sessões legadas, re-deriva authz |
 | `/node-ops` | audita/scaffolda o `<projeto>_ops` (interface única): fluxo de ambientes, instalação paralela (`nproc`), independência |
 | `/node-review` | gate escopo-diff da DoD/anti-padrões no diff: `any`/`@ts-ignore` novo, `.catch(()=>{})`, arquivo tocado >750 (bloqueia) / >300 úteis (flag), **rota/handler/serviço Node NOVO sem ADR**, segredo de `process.env` |
-| `/node-cc` · `/node-handoff` · `/node-qa` · `/node-index` | context compact / handoff / Q.A. no contexto Node/TS (aplica a schematize-qa: /qa-plan → /qa-run) / (re)gera índice |
+| `/node-cc` | context compact: gera context.md + checklist.md no archive e roda `/compact` |
+| `/node-handoff` | gera o handoff (context.md + checklist.md) **sem** compactar — pra fim de sessão |
+| `/node-qa` | Q.A. no contexto Node/TS — wrapper fino da skill **schematize-qa** (`/qa-plan` → `/qa-run`) |
+| `/node-index` | (re)gera o índice de microfunções (§39) a partir dos doc-comments |
 
 ## Pisos gerais herdados (escopo-diff)
 
-Mesmos das skills go/rust — leia o reference; **aplicados ao que você toca**:
+Mesmos das skills irmãs do rol — leia o reference; **aplicados ao que você toca**:
 
 - **Arquitetura/DDD, repos `<projeto>_<contexto>[_<lang>]`, `<projeto>_ops`, independência de runtime** (cada serviço sobe e funciona sozinho; falha ao notificar outro → persiste/loga/alerta/retoma).
 - **Fluxo de ambientes e ops (`references/ops.md`).** Toda mudança segue **dev local → teste local → GitHub → hml → prd**; **VETADO editar código direto no servidor** (hml/prd é imutável por edição manual, recebe só artefato do git). **100%** das operações no servidor (install/update/correção/config/migrate/rollback) passam pela **ferramenta do `<projeto>_ops`** — nunca à mão; o ops é **autônomo** (o usuário provisiona o servidor do zero sem a IA). **Instalação sempre paralela** = `nproc`; **falha no paralelo = serviços não independentes → corrigir a independência é prioridade máxima** (não serializar pra mascarar). (`/node-ops`)
 - **Deploy destrutivo por seed + isolamento por usuário (`schematize-engineering` -> `references/ops.md` §2–§3).** O ops provisiona em **`/<app>/`** clonando os repos dentro; **`/<app>/.env` é o seeder global** (fonte única de config). **Todo redeploy é destrutivo na aplicação** — apaga a anterior e recria um clone zerado só com o seed (idempotente/sem drift), **preservando os dados** (migration reversível; `ops reset` de dados só em dev/hml). **Cada serviço roda como user Linux próprio em systemd unit hardened** (blast radius mínimo). Tudo automatizado pelo ops. (`/node-ops`)
 - **Segurança** (segredo nunca no cliente, SQL parametrizado, auth server-side) + os riscos Node acima.
-- **IAM — migrar o auth legado é PRIORIDADE 0 (acima do gatilho 30/50 de saída).** O auth legado típico (Passport/express-session/**JWT no `localStorage`**/`bcrypt`/**email como ID**/**1 fator**/authz por coluna/**monolith apensado**) é dívida de segurança — porta-se pro **IAM da casa como app SEPARADA** (Go/Rust em `auth.<domain>`, OIDC/PKCE, JWKS público) por **strangler-fig**: mapeia `users`→**ID interno imutável** (email≠ID, dedupe), **re-hash preguiçoso** (bcrypt→argon2id), **JWT sai do `localStorage`**, **força 2º fator no 1º login**, **revoga sessões legadas**, **re-deriva a authz no ReBAC** (nunca confia na coluna legada; deny-default, token fino), **sessão 7d/90d**, **logout irreversível**. Paridade provada antes do cutover; concluído = **auth legado deletado**. Detalhe em `references/iam.md`; `/node-iam`; testes na `schematize-pentest`.
+- **IAM — migrar o auth legado é PRIORIDADE 0 (acima do gatilho 30/50 de saída).** O auth legado típico (Passport/express-session/**JWT no `localStorage`**/`bcrypt`/**email como ID**/**1 fator**/authz por coluna/**monolith apensado**) é dívida de segurança — porta-se pro **IAM da casa como app SEPARADA** (linguagem do rol em `auth.<domain>`, OIDC/PKCE, JWKS público) por **strangler-fig**: mapeia `users`→**ID interno imutável** (email≠ID, dedupe), **re-hash preguiçoso** (bcrypt→argon2id), **JWT sai do `localStorage`**, **força 2º fator no 1º login**, **revoga sessões legadas**, **re-deriva a authz no ReBAC** (nunca confia na coluna legada; deny-default, token fino), **sessão 7d/90d**, **logout irreversível**. Paridade provada antes do cutover; concluído = **auth legado deletado**. Detalhe em `references/iam.md`; `/node-iam`; testes na `schematize-pentest`.
 - **Efeito externo NUNCA sai de não-produção — repo-wide, NÃO escopo-diff.** E-mail, SMS/voz, push, webhook de terceiro e cobrança **não acontecem de verdade** fora de `prd`. Em Node: transporte **sink** por default (`nodemailer` com **`jsonTransport`/`streamTransport`**, ou o **SMTP do Mailpit** quando você quer uma caixa com API HTTP pro teste ler) e **real só em `prd`** (credencial por `required()` — ausente, o processo **não sobe**, em vez de sinkar calado); o guard é um **wrapper do `sendMail`** (`GuardedMailer`) que **lança erro tipado** (`ExternalRecipientBlockedError`) para destinatário fora do domínio de teste — **VETADO** `.catch(() => {})` em cima da recusa. **Cap por execução** (`MAIL_MAX_PER_RUN`, default 50) com abort, **fail-closed** (`APP_ENV` ausente/desconhecido ⇒ não-prd), **chave sandbox** fora de prd, e `no-restricted-imports` no ESLint proibindo importar `nodemailer`/`resend` fora de `src/mail/` (fecha o bypass "chamei o SDK direto"). Todo endereço sintético (teste, fixture, seed, script) é `<papel>+<run-id>-<n>@test.<domain>` — **rota nula** (null MX RFC 7505 + SPF `-all` + DMARC `p=reject`) ou TLD reservado (`.test`/`.invalid`/`.example`); **VETADO** `@gmail.com`, domínio de terceiro, e-mail de pessoa real (inclusive o seu) e o domínio de produção. Entregar de verdade fora de prd exige **as cinco** (ADR + allowlist ≤5 + cap + janela + subdomínio separado). Motivo: bounce/complaint em massa **queima IP e domínio** e derruba o transacional de prd — inclusive o **OTP de login**. Código, wrapper e testes em `references/iam.md` §3.1; normativa em `schematize-engineering` → `references/efeitos-externos.md`.
 - <!-- herdado:engineering/orquestracao:bullet -->**Orquestrador não desenvolve; subagent barato executa** (`schematize-engineering` → `references/orquestracao.md` §9). O principal só planeja/decompõe/despacha/supervisiona/revisa; ação onerosa vira micro-tasks; subagents em `sonnet` por padrão (falhou → mesmo subagent corrige, até 2 rodadas → re-decompõe → só então `opus`, com motivo registrado no checkpoint). No `overdev`, cada item do checklist é executado por subagent `sonnet` e revisado pelo principal (diff + gate) antes do `- [x]`. **Sem frota ociosa:** agent idle com pendência executável volta ao trabalho; pendência que depende de outro agent → mata e enfileira com gatilho de dependência; terminou → mata (§9.6).<!-- /herdado -->
 - **Testes "verde de verdade"** + **rede de segurança de legado**: characterization/golden-master **antes** de tocar código sem teste; contract tests na costura antes de extrair.
 - **Observabilidade escalonada:** log estruturado (`pino`) + métrica básica no **piso**; LGTM+ completo (OTel/Alloy/Loki/Tempo/Prometheus/Mimir + Helm) como **alvo** — retrofit de tracing distribuído não é pré-requisito pra tocar no código. Auto-instrumentação (`@opentelemetry/auto-instrumentations-node`) e propagação `traceparent` cross-seam Node↔Go.
-- **Clean code + índice/MAPA** (doc-comment com fluxo **de onde vem → o que faz → pra onde vai**; **`MAPA.md` e índice em `<projeto>_archive/index/`, nunca no root** — todo MD gerado mora no archive, root limpo, §28), **archive**, gestão de contexto — tudo escopo-diff. **Sem frota ociosa:** agent idle com pendência executável volta ao trabalho; pendência que depende de outro agent → mata e enfileira com gatilho de dependência; terminou → mata (§9.6).
+- **Clean code + índice/MAPA** (doc-comment com fluxo **de onde vem → o que faz → pra onde vai**; **`MAPA.md` e índice em `<projeto>_archive/index/`, nunca no root** — todo MD gerado mora no archive, root limpo, §28), **archive**, gestão de contexto — tudo escopo-diff.
 
-## Andaime pronto (a bundlar na build)
+## Andaime pronto
 
-`scripts/node-audit.mjs`, `scripts/check-diff.sh` (Node), `scripts/build-index.mjs`, `assets/lint/eslint.config` + `tsconfig.strict.json`, `assets/CLAUDE.md`, templates (ADR/MAPA/…), hooks de contexto — paridade com go/web.
+- `scripts/node-audit.mjs` — higiene de deps com exit code (contagem direto/transitivo, lockfile, `engines`, EOL do runtime, `npm audit`); é o que `/node-audit` executa. Teste: `scripts/node-audit.test.sh`.
+- `scripts/check-diff.sh`, `scripts/build-index.mjs`, `scripts/lib.sh`, `scripts/hooks/*.mjs` — gate escopo-diff, índice e gestão de contexto (paridade com as irmãs).
+- `assets/lint/eslint.config.mjs` (flat config, ESLint 9+: fronteira de camadas, `any`/`@ts-ignore`, promises, import de e-mail fora de `src/mail/`) e `assets/lint/tsconfig.strict.json` — o projeto estende, não reinventa.
+- `assets/CLAUDE.md`, `assets/ci/github-actions-ci.yml`, templates (ADR/MAPA/…).
 
 ## Mapa de references
 
@@ -152,3 +161,7 @@ Mesmos das skills go/rust — leia o reference; **aplicados ao que você toca**:
 | Anti-padrões vetados | `references/anti-padroes.md` |
 | Contexto Claude Code (handoff/hooks) | `references/contexto-claude-code.md` |
 | Números voláteis (limiares de deps, Node LTS) | `references/stack-versoes.md` |
+| Cadeia de suprimentos: lockfile, SBOM, scan que trava, imagem mínima/pinada/assinada | `references/cadeia-suprimentos.md` |
+| Dados e eventos: banco, mensageria, cache, APIs, resiliência, jobs (do que você toca) | `references/dados-eventos.md` |
+| Entrega: templates, feature flags, IA assistida, DoD, índice (§29+) | `references/entrega.md` |
+| Operação: config, deploy, git/PR, runbooks, ADR, archive (§20–28) | `references/operacao.md` |

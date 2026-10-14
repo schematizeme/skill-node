@@ -68,4 +68,4 @@ node --permission      --allow-fs-read=/app --allow-fs-read=/app/config      --a
 
 ## Testar legado sem teste
 
-Legado costuma ter **zero teste**. Antes de tocar comportamento existente, crie uma **rede de segurança** (characterization / golden-master): capture a saída atual como fixture e trave-a, pra que sua mudança não altere comportamento sem querer. Na saída pra Go/Rust, os **contract/golden tests** provam paridade antes de desligar o Node (§migracao-saida).
+Legado costuma ter **zero teste**. Antes de tocar comportamento existente, crie uma **rede de segurança** (characterization / golden-master): capture a saída atual como fixture e trave-a, pra que sua mudança não altere comportamento sem querer. Na saída pro rol sancionado, os **contract/golden tests** provam paridade antes de desligar o Node (§migracao-saida).

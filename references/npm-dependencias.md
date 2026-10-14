@@ -65,7 +65,7 @@ Cada dependência é superfície de ataque, custo de bundle e dívida de manuten
   bug, disco, monorepo), a decisão é **ADR**, e `pnpm` é a escolha defensável (deps estritas, sem
   phantom deps, store compartilhado). Frontend novo em Node continua sendo da `schematize-web`, e é
   lá que a escolha de PM para projeto novo mora.
-- **Monorepo/workspaces:** "1 repo = 1 bounded context" mapeia em **packages**; alinhe versões com `syncpack`; a migração-por-módulo vira **extrair um package do workspace** para um repo Go/Rust (§migracao-saida).
+- **Monorepo/workspaces:** "1 repo = 1 bounded context" mapeia em **packages**; alinhe versões com `syncpack`; a migração-por-módulo vira **extrair um package do workspace** para um repo/serviço do rol (§migracao-saida).
 
 ## Toolbelt (concretiza `/node-audit`)
 

@@ -49,7 +49,7 @@ auth novo em Node: o auth-alvo é serviço próprio numa linguagem do rol sancio
 
 ## 1. Topologia — auth é uma APLICAÇÃO SEPARADA (o alvo da migração)
 
-- **Microserviço de auth** (`<projeto>_auth_<lang>`, nasce em **Go/Rust**, nunca Node novo)
+- **Microserviço de auth** (`<projeto>_auth_<lang>`, nasce numa **linguagem do rol (fit + ADR)**, nunca Node novo)
   + **front de auth** próprio (`<projeto>_authfront`), com **repo, deploy, user Linux e
   systemd/container isolados**. Comprometer a app Node legada **não** compromete o IdP.
 
@@ -497,7 +497,7 @@ extração, não espera cruzar % de módulo. Estratégia **strangler-fig** (casa
 **Ordem de corte (dual-run atrás do edge de auth):**
 
 1. **Edge de auth na frente.** Coloca um proxy/roteador de auth (o novo IdP em
-   `auth.<domain>`, Go/Rust) na frente do fluxo. O monolith Node continua servindo, mas o
+   `auth.<domain>`, linguagem do rol) na frente do fluxo. O monolith Node continua servindo, mas o
    **login passa a nascer no auth novo**; rotas ainda-não-migradas caem no legado. Feature
    flag de cutover por coorte, **rollback** sempre à mão.
 
@@ -537,7 +537,7 @@ extração, não espera cruzar % de módulo. Estratégia **strangler-fig** (casa
   ACL/one-shot import, nunca aponta os dois para a mesma tabela (senão vira monólito
   distribuído, VETADO).
 
-- **O auth migrado nasce já como app separada** (§1), em Go/Rust — não é "auth Node novo".
+- **O auth migrado nasce já como app separada** (§1), numa linguagem do rol — não é "auth Node novo".
 
 ## 8. Rotina agressiva de testes (detalhe na schematize-pentest)
 
@@ -579,7 +579,7 @@ corte:
 
 ## Fases (do legado ao alvo)
 
-- **F0** Edge de auth + IdP novo (app separado em `auth.<domain>`, Go/Rust) na frente; login
+- **F0** Edge de auth + IdP novo (app separado em `auth.<domain>`, linguagem do rol) na frente; login
   nasce no novo, dual-run com o monolith Node.
 
 - **F1** Import/dedupe `users` legados → ID interno imutável; identificadores não verificados.
@@ -600,7 +600,7 @@ corte:
 
 - [ ] Auth legado Node/TS **identificado e em migração ativa** (prioridade 0) — não deixado como está.
 
-- [ ] Auth-alvo é **app separada** (`auth.<domain>`, serviço Go/Rust + front próprios, isolados) — não o monolith Node.
+- [ ] Auth-alvo é **app separada** (`auth.<domain>`, serviço do rol + front próprios, isolados) — não o monolith Node.
 
 - [ ] `users` legados **mapeados** → **ID interno imutável**; email/telefone não são ID; emails deduplicados; múltiplos emails suportados.
 

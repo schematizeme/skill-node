@@ -1,8 +1,8 @@
 # schematize-node
 
-> **Manutenção de legado Node.js/TypeScript** e saída gradual para Go/Rust — sem reescrever o que funciona. Pacote de **skill normativa para [Claude Code](https://claude.com/claude-code)**. Parte do catálogo **schematize skills**.
+> **Manutenção de legado Node.js/TypeScript** e saída gradual para o rol sancionado — sem reescrever o que funciona. Pacote de **skill normativa para [Claude Code](https://claude.com/claude-code)**. Parte do catálogo **schematize skills**.
 
-Esta skill é de **manutenção**, não de green-field: **Node backend está em saída**, funcionalidade nova nasce em Go/Rust (`skill-go`/`skill-rust`); frontend Node é do `skill-web`. Quase tudo é **escopo-diff** (só no que você toca).
+Esta skill é de **manutenção**, não de green-field: **Node backend está em saída**, funcionalidade nova nasce numa linguagem do rol sancionado (fit + ADR; skills irmãs `skill-go`, `skill-rust`, …); frontend Node é do `skill-web`. Quase tudo é **escopo-diff** (só no que você toca).
 
 ## Instalar
 

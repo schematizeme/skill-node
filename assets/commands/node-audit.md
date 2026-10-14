@@ -4,7 +4,7 @@ description: schematize-node — higiene de dependências npm/pnpm/yarn: contage
 
 Rode a **auditoria de dependências e runtime** deste projeto Node e reporte de forma acionável. Detecte o package manager pelo lockfile (npm/pnpm/yarn) e use os comandos equivalentes.
 
-Colete e reporte (idealmente via `scripts/node-audit.mjs`, saída JSON + resumo):
+Rode primeiro `node .claude/skills/schematize-node/scripts/node-audit.mjs [--json] [--max-direct 40] [--strict]` — ele faz os itens 1, 2 (via `npm audit`) e 6–7 e **sai com exit code**: `0` limpo, `1` achado bloqueante (lockfile ausente, `engines.node` ausente, runtime em EOL, CVE high/critical fora da allowlist `.node-audit-allow.json`, allowlist vencida; contagem alta/`.npmrc` sem `ignore-scripts` são dívida e só travam com `--strict`), `2` erro de uso/ambiente (nunca vira verde). Complete à mão os itens 3–5 (ncu, knip/depcheck, licenças). O que o script cobre:
 
 1. **Contagem de dependências (direto ≠ transitivo):**
    - Diretas de produção: `jq '.dependencies | length' package.json`.

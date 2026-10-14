@@ -13,7 +13,7 @@ combinando o checker determinístico com seu julgamento.
      erro, teste silenciado, etc.
    - **§6:** arquivo >750 linhas (ou >~500 de código útil) sem quebra → bloqueia; >300 de código útil (~400 em observabilidade) → **flag** (não bloqueia, sinaliza dívida); função sem doc-comment (o quê + onde).
    - **§39:** o índice de funcionalidades foi atualizado no mesmo PR?
-   - **§3 / superfície nova (crítico p/ legado):** rota/endpoint/handler/serviço **Node NOVO** sem ADR de exceção — nova funcionalidade nasce em Go/Rust, não em Node. Backend novo em Node/PHP é proibido.
+   - **§3 / superfície nova (crítico p/ legado):** rota/endpoint/handler/serviço **Node NOVO** sem ADR de exceção — nova funcionalidade nasce numa linguagem do rol (fit + ADR), não em Node. Backend novo em Node/PHP é proibido.
    - **Escopo-diff:** os pisos de qualidade (teto de 750 linhas/arquivo com flag em >300 úteis, doc, TS strict, `any`) valem para arquivo novo e trecho tocado; **não** reprove dívida pré-existente que não veio no diff (regra escoteiro, `references/padroes-codigo.md` §0).
 3. Produza um relatório com `BLOQUEIA` (viola piso/DoD) e `ATENÇÃO` (melhorar),
    citando arquivo:linha. Se houver qualquer `BLOQUEIA`, a task **não está pronta** (§35).

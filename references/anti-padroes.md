@@ -29,7 +29,7 @@
 ### Operação e entrega
 
 31. **Criar serviço backend novo em Node, ou qualquer código novo em PHP.**
-    → Node **não recebe serviço backend novo** — ele é legado e sai pela regra dos ~30%/~50% (§3, §3.1); **Next.js/Astro no frontend seguem 100% permitidos**. O serviço novo nasce **no rol sancionado** (Go, Rust, Elixir, C#, Zig, Ruby) com **ADR (§27) de fit** — não "em Go/Rust" por default. PHP é proibido e migra. Rol e critérios em `schematize-engineering` -> `references/linguagens.md`.
+    → Node **não recebe serviço backend novo** — ele é legado e sai pela regra dos ~30%/~50% (§3, §3.1); **Next.js/Astro no frontend seguem 100% permitidos**. O serviço novo nasce **no rol sancionado** (Go, Rust, Elixir, C#, Zig, Ruby) com **ADR (§27) de fit** — não "em Go/Rust" por default. PHP é legado e migra por funcionalidade quando tocado. Rol e critérios em `schematize-engineering` -> `references/linguagens.md`.
 
 35. **Editar código direto no servidor** (hml/prd), ou **subir mudança direto pra hml/prd** pulando `dev local → teste local → GitHub`.
     → Servidor é **imutável por edição manual**; recebe só artefato promovido do git. Hotfix segue o mesmo fluxo, acelerado (`schematize-engineering` -> `references/ops.md` §1).
@@ -58,7 +58,7 @@
 ### IAM legado (migração é prioridade 0)
 
 43. **Deixar o auth legado Node/TS como está** — não portá-lo pro IAM da casa ("depois", "funciona", "é legado que não se mexe"). Auth não é Node comum: 1 fator, email como ID e logout que não invalida são **buracos de segurança ativos**, não estética.
-    → **Migrar o auth legado é PRIORIDADE 0** — acima do gatilho normal de saída (30/50). Strangler-fig pro IAM da casa como **app separada** (Go/Rust, `auth.<domain>`), dual-run, corte por coorte, **concluído = auth legado deletado** (`references/iam.md` §7, §3.1).
+    → **Migrar o auth legado é PRIORIDADE 0** — acima do gatilho normal de saída (30/50). Strangler-fig pro IAM da casa como **app separada** (linguagem do rol, `auth.<domain>`), dual-run, corte por coorte, **concluído = auth legado deletado** (`references/iam.md` §7, §3.1).
 
 44. **Manter o auth apensado ao monolith** (mesmo processo/user/deploy da app principal), assinando token com **HS256 e segredo no `.env` da app**, ou emitindo/renovando JWT no client.
     → Auth é **app SEPARADA** em `auth.<domain>` (serviço + front próprios, isolados); apps delegam por **OIDC/OAuth2.1 + PKCE** e validam por **JWKS público** — a chave de assinatura vive só no auth (`references/iam.md` §1).

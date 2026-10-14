@@ -3,6 +3,23 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.14.0] — 2026-10-14
+Saneamento da skill: o que `SKILL.md` e o comando `/node-audit` prometiam agora existe, e a saída do Node deixa de ser "só Go/Rust".
+
+### Adicionado
+- `scripts/node-audit.mjs` (lockfile, `engines`, EOL do runtime, contagem direto/transitivo, `npm audit` com allowlist time-boxed; exit 0/1/2) + `scripts/node-audit.test.sh` com 12 casos (vermelhos plantados) plantados (npm stubado, sem rede).
+- `assets/lint/eslint.config.mjs` (flat config, ESLint 9+, exercitada no 10: `any`/`@ts-ignore`, promises, `catch {}`, camadas, SDK de e-mail só em `src/mail/`) e `assets/lint/tsconfig.strict.json` — prometidos por `typescript-estilo.md`.
+- CI: `tsc --noEmit`, ESLint, testes, `npm audit` e `node-audit.mjs` (job `node-lint-test`); `INDEX_SRC` default `./src`; Trivy/Gitleaks/checkout pinados por SHA.
+
+### Alterado
+- Description reescrita (≤350 chars) para manutenção/migração de legado Node/TS (`package.json`, `tsconfig`, npm/pnpm).
+- Saída do Node vai "para o rol sancionado, por fit + ADR" (SKILL, CLAUDE.md, arquitetura, migracao-saida, iam, comandos, README, skill.toml) em vez de "só Go/Rust"; PHP migra por funcionalidade quando tocado; "50% extraído" não vira big-bang.
+- Tabela de comandos lista `/node-cc`, `/node-handoff`, `/node-qa`, `/node-index` separados; mapa de references inclui cadeia-suprimentos, dados-eventos, entrega e operacao; andaime descreve só o que existe.
+- `references/stack-versoes.md` reverificado em 2026-10-14 (nodejs.org + schedule.json oficial): 24 Active LTS (Maintenance em 2026-10-20), 22 Maintenance, 26 vira LTS em 2026-10-28, 20 em EOL desde 2026-04-30; nota de que typescript-eslint ainda exige TypeScript < 6.1.
+
+### Removido
+- `assets/lint/.golangci.yml` (config Go dentro da skill Node) e `assets/lint/eslint.layers.cjs` (eslintrc antigo, migrado para flat config); repetição do bloco "Sem frota ociosa" que já vem no bloco herdado.
+
 ## [0.13.2] — 2026-09-30
 O piso de orquestração passa a ser **herdado** da base em vez de copiado à mão: uma mudança na engineering não exige mais editar 38 arquivos.
 
