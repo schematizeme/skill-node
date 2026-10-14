@@ -3,6 +3,20 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.15.0] — 2026-10-14
+Gate da skill-dev verde, ponteiros para as skills novas e testes dos scripts.
+
+### Adicionado
+- `scripts/archive-secret-scan.test.sh`, `check-diff.test.sh`, `smoke-selfcheck.test.sh` e `test-skeleton.test.sh` com vermelho e verde plantados (repo/servidor temporários, segredos falsos montados em tempo de execução): o gate da skill-dev reprovava `script-sem-teste` e um gate sem vermelho plantado é decoração.
+
+### Alterado
+- Ponteiros: `iam.md` -> `schematize-iam`; `dados-eventos.md` -> `schematize-postgres` e `schematize-api`; `SKILL.md` com as três.
+- Description com gatilho concreto (`package.json`/`tsconfig`), 220 -> 167 chars.
+
+### Corrigido (bugs que os testes novos expuseram)
+- `check-diff.sh`: base inexistente (`git diff` falhava, lista vazia) saía **OK sem olhar nada**; agora BLOQUEIA. A regra de CORS não pegava `Allow-Origin", "*"` (vírgula entre cabeçalho e valor). Mensagem de PHP não diz mais "proibido": legado PHP migra por funcionalidade quando tocado.
+- `archive-secret-scan.sh`: a classe de caracteres do `password=` excluía `n` e `\` (literal `\n` em bracket POSIX), então senha com `n` no valor passava; corrigido.
+
 ## [0.14.1] — 2026-10-14
 Ressincronização dos blocos herdados com a engineering v0.27.0; sem mudança de piso próprio.
 
