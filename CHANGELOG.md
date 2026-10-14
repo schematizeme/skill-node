@@ -3,6 +3,12 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.14.1] — 2026-10-14
+Ressincronização dos blocos herdados com a engineering v0.27.0; sem mudança de piso próprio.
+
+### Alterado
+- Blocos herdados ressincronizados com a `schematize-engineering` v0.27.0 (`tools/sync-herdados.mjs`): orquestração com a regra de imagem (nunca pelo Claude; detecta Codex/Gemini e pergunta ao usuário qual usar, Codex como sugestão) e `schematize overdev delegar` (comando do app) no lugar do falso nome de skill `schematize-overdev`.
+
 ## [0.14.0] — 2026-10-14
 Saneamento da skill: o que `SKILL.md` e o comando `/node-audit` prometiam agora existe, e a saída do Node deixa de ser "só Go/Rust".
 
