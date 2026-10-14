@@ -1,7 +1,7 @@
 ---
 name: schematize-node
 metadata:
-  version: 0.14.1
+  version: 0.15.0
 description: >-
   Manutenção de legado Node.js/TypeScript. Use ao tocar package.json/tsconfig (Express/Nest/Fastify): escopo-diff, deps, TS estrito, ESM/CJS, EOL. Não cria serviço novo.
 ---
@@ -10,7 +10,7 @@ description: >-
 
 Node como **linguagem de serviço backend está em saída**. Esta skill governa **manter bem** o que já roda em Node/TS e **conduzir a saída** para o rol sancionado de forma segura e incremental — **não** justifica código Node novo. Mesma base normativa das demais skills; o que muda é o ferramental Node/TS, a disciplina de saída, e o fato de que **quase tudo aqui é aplicado só ao que você toca** (legado não se reescreve inteiro).
 
-**Versão:** skill `schematize-node` v0.14.1. Changelog em `CHANGELOG.md`.
+**Versão:** skill `schematize-node` v0.15.0. Changelog em `CHANGELOG.md`.
 
 ## Posição da stack (leia primeiro)
 
