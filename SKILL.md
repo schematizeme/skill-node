@@ -3,9 +3,8 @@ name: schematize-node
 metadata:
   version: 0.14.0
 description: >-
-  Manutenção e migração de legado Node.js/TypeScript (package.json, tsconfig, npm/pnpm, Express/Nest/Fastify):
-  escopo-diff, higiene de deps, TS estrito incremental, ESM/CJS, EOL do runtime. Não cria serviço novo; Next/Astro é
-  da schematize-web.
+  Manutenção de legado Node.js/TypeScript (package.json, tsconfig, npm/pnpm, Express/Nest/Fastify): escopo-diff, deps,
+  TS estrito incremental, ESM/CJS, EOL do runtime. Não cria serviço novo; Next/Astro é da schematize-web.
 ---
 
 # Padrões de Engenharia da Casa — Node.js/TypeScript legado (manutenção)
